@@ -53,3 +53,18 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+.vs/
+luyiwei_test/
+out/
+CMakeSettings.json
+CLAUDE.md
+
+# CMake build directory (use cmake -S . -B build, then cmake --build build)
+build/
+
+# CMake-generated metadata (machine-local cache, regen from CMakeLists.txt)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
