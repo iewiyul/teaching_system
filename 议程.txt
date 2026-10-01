@@ -1,0 +1,23 @@
+1.项目的git clone
+项目的地址：https://github.com/iewiyul/teaching_system
+安装git：https://git-scm.com/
+git clone https://github.com/iewiyul/teaching_system.git（大概率超时）
+git clone git@github.com:iewiyul/teaching_system.git（需要本地配置一下github的ssh密钥）
+
+2.介绍项目的架构
+main.c
+公共文件（common，entity，data/，ui/）
+需要动手完成的文件（ds/，service/）
+
+3.调试和运行的方法（推荐用visual studio，可以省去很多配置的麻烦）
+
+4.上传自己的个人分支
+本地创建新分支：git switch -c "你分支的名字"
+写完代码后提交的流程：
+git add .
+git commit -m "你的提交说明，写啥都行"
+git push origin "你分支的名字"
+
+ps:建议使用git推送自己的代码，如果实在不会的话，那就直接把做好的文件发给我
+
+王道
