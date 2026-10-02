@@ -43,6 +43,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 # README 风格 Windows / Linux 平台都生成同名可执行文件 (Windows 自动加 .exe)
 add_executable(teaching_system
     src/main.c
+    src/common.c                          # 跨层公共工具: history_record / format_time / hash_str
     src/ui/Menu.c
 
     # 数据结构 (一层)
