@@ -65,10 +65,10 @@
 | 角色 | 数据结构 | 业务模块 | 报告章节 |
 |------|----------|----------|----------|
 | **陆奕炜** | 图 Graph | 主入口 / CourseService / 种子数据 / 报告统筹 | §1 §2.1 §3.3 §6 |
-| **组员 B** | 栈 + 队列 | NoticeService / OperationHistory | §3.2 |
-| **组员 C** | 顺序表 + 链表 | TeacherService / StudentService | §3.1 |
-| **组员 D** | BST + 哈希表 | SearchService | §3.4 §4 |
-| **组员 E** | 堆 | ScoreService / RankingService | §3.5 §4 |
+| **徐欣阳** | 栈 + 队列 | NoticeService / OperationHistory | §3.2 |
+| **赵默涵** | 顺序表 + 链表 | TeacherService / StudentService | §3.1 |
+| **史小影** | BST + 哈希表 | SearchService | §3.4 §4 |
+| **王晴晴** | 堆 | ScoreService / RankingService | §3.5 §4 |
 
 ---
 
