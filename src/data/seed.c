@@ -16,7 +16,98 @@ extern StudentService *g_studentService;
 extern CourseService *g_courseService;
 extern SearchService *g_searchService;
 
+/* === CourseService standalone smoke test ===
+ * 只测不依赖其他 service 的功能：lifecycle、Course CRUD、getter、NULL 守卫。
+ * 交互式 confirm / 跨 service（teachersRef、studentsRef、scoresRef）的函数
+ * 在此测试范围内暂跳过，等 B/C/D/E 交付后再补。 */
+#define EXPECT(cond, msg) do {                                         \
+    printf("  %s %s\n", (cond) ? "✅" : "❌", msg);                     \
+} while (0)
+
+/* 文件作用域辅助：构造一条 Course（MSVC 不允许 nested function，必须前向声明） */
+static Course mk_course(const char *id, const char *name,
+                        double credit, int hours, const char *sem);
+
+static void course_service_smoke_test(void) {
+    printf("\n========================================\n");
+    printf("  CourseService 冒烟测试（standalone）\n");
+    printf("========================================\n");
+
+    /* [1] lifecycle + getter */
+    CourseService *s = course_service_create(NULL, NULL, NULL);
+    EXPECT(s != NULL,                         "create(NULL,NULL,NULL) 非空");
+    EXPECT(course_service_getGraph(s) != NULL, "getGraph() 非空");
+    EXPECT(course_service_getList(s) != NULL,  "getList()  非空");
+    EXPECT(course_service_getGraph(NULL) == NULL, "getGraph(NULL) 返回 NULL");
+    EXPECT(course_service_getList(NULL)  == NULL, "getList(NULL)  返回 NULL");
+
+    /* [2] course_add / 重名检测 */
+    EXPECT(course_add(s, mk_course("C001", "数据结构",     4.0, 64, "2024秋")), "add C001");
+    EXPECT(course_add(s, mk_course("C002", "算法分析",     3.0, 48, "2024秋")), "add C002");
+    EXPECT(course_add(s, mk_course("C003", "数据库原理",   4.0, 64, "2024秋")), "add C003");
+    EXPECT(!course_add(s, mk_course("C001", "重复",        1.0, 16, "2024秋")),
+           "重复 add C001 应失败（graph 顶点重名）");
+
+    /* [3] course_update（含 id 漂移校验） */
+    Course c2new = mk_course("C002", "算法分析（修订）", 3.5, 56, "2024秋");
+    EXPECT(course_update(s, "C002", c2new),        "update C002 成功");
+
+    Course bogus = mk_course("C999", "X", 1.0, 16, "2024秋");
+    EXPECT(!course_update(s, "C999", bogus),       "update 不存在的 C999 应失败");
+
+    Course drifted = mk_course("C099", "X", 1.0, 16, "2024秋"); /* c.id != 查询 id */
+    EXPECT(!course_update(s, "C001", drifted),     "update 时 c.id 漂移应拒绝");
+
+    /* [4] course_listAll / queryById */
+    printf("\n--- listAll ---\n");
+    course_listAll(s);
+
+    printf("\n--- queryById C002 ---\n");
+    course_queryById(s, "C002");
+
+    printf("\n--- queryById 不存在的课程号 ---\n");
+    course_queryById(s, "CXXX");
+
+    /* [5] 边操作：teachersRef/studentsRef 都是 NULL，校验路径必失败 */
+    EXPECT(!course_assignTeacher(s, "C001", "T001", 4.5),
+           "assignTeacher 在 teachersRef=NULL 时校验失败");
+    EXPECT(!course_addStudent(s, "C001", "S2023001"),
+           "addStudent 在 studentsRef=NULL 时校验失败");
+
+    /* [6] NULL 守卫 */
+    EXPECT(!course_add(NULL, mk_course("C100", "X", 1.0, 16, "2024秋")),
+           "course_add(NULL, ...) 返回 false");
+    EXPECT(!course_update(NULL, "C001", bogus),    "course_update(NULL,...) 返回 false");
+
+    /* [7] 销毁 */
+    course_service_destroy(s);
+    course_service_destroy(NULL);     /* NULL 守卫应 no-op */
+
+    /* [8] 空 CourseService 的 listAll */
+    CourseService *empty = course_service_create(NULL, NULL, NULL);
+    printf("\n--- 空 CourseService 的 listAll ---\n");
+    course_listAll(empty);
+    course_service_destroy(empty);
+
+    printf("\n========================================\n");
+    printf("  冒烟测试结束；交互式 / 跨 service 函数跳过\n");
+    printf("========================================\n\n");
+}
+
+/* 文件作用域辅助：构造一条 Course（C99/C11 标准允许，避开 MSVC nested-function） */
+static Course mk_course(const char *id, const char *name,
+                        double credit, int hours, const char *sem) {
+    Course c; memset(&c, 0, sizeof c);
+    snprintf(c.id,       MAX_ID_LEN,   "%s", id);
+    snprintf(c.name,     MAX_NAME_LEN, "%s", name);
+    c.credit = credit; c.hours = hours;
+    snprintf(c.semester, sizeof c.semester, "%s", sem);
+    return c;
+}
+
 void init_seed_data(void) {
+    course_service_smoke_test();
+
     srand((unsigned)time(NULL));
 
     printf("[种子数据加载中...]\n");
